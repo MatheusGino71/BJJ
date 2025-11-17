@@ -1,0 +1,126 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// Modelo de Usuário Admin
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String
+  role      String   @default("admin")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Modelo de Lead (Contatos do formulário)
+model Lead {
+  id        String   @id @default(uuid())
+  name      String
+  email     String
+  phone     String
+  message   String
+  status    String   @default("new")
+  source    String   @default("website")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  notes     Note[]
+}
+
+// Modelo de Aluno
+model Student {
+  id           String        @id @default(uuid())
+  name         String
+  email        String        @unique
+  phone        String
+  cpf          String?       @unique
+  dateOfBirth  DateTime?
+  address      String?
+  emergencyContact String?
+  emergencyPhone   String?
+  belt         String        @default("branca")
+  program      String
+  status       String        @default("active")
+  planType     String
+  monthlyFee   Float
+  paymentDay   Int           @default(10)
+  startDate    DateTime      @default(now())
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  payments     Payment[]
+  attendances  Attendance[]
+  notes        Note[]
+}
+
+// Modelo de Pagamento
+model Payment {
+  id          String   @id @default(uuid())
+  studentId   String
+  student     Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  amount      Float
+  dueDate     DateTime
+  paidDate    DateTime?
+  status      String   @default("pending")
+  method      String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// Modelo de Presença
+model Attendance {
+  id          String   @id @default(uuid())
+  studentId   String
+  student     Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  date        DateTime @default(now())
+  program     String
+  instructor  String
+  present     Boolean  @default(true)
+  createdAt   DateTime @default(now())
+}
+
+// Modelo de Notas
+model Note {
+  id          String   @id @default(uuid())
+  content     String
+  type        String   @default("general")
+  leadId      String?
+  lead        Lead?    @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  studentId   String?
+  student     Student? @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// Modelo de Aula Experimental
+model TrialClass {
+  id          String   @id @default(uuid())
+  name        String
+  email       String
+  phone       String
+  preferredDate DateTime
+  preferredTime String
+  program     String
+  status      String   @default("scheduled")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// Modelo de Eventos
+model Event {
+  id          String   @id @default(uuid())
+  title       String
+  description String
+  eventDate   DateTime
+  type        String
+  published   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
